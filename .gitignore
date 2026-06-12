@@ -1,0 +1,11 @@
+__pycache__/
+*.csv
+*.sqlite
+*.db
+.venv/
+Test_zone.py
+Digital_Environment001.py
+Digital_Environment002.py
+Digital_Environment002 copy.py
+Environment002.py
+Mushcraft.py
