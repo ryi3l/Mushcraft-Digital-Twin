@@ -109,19 +109,3 @@ else:
         current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
         sensor_temp = add_sensor_noise(current_temp, temp_noise)
         print(f"New value after drift and noise: {sensor_temp:.2f}")
-
-"""
-
-=============================================================================
-TO DO:
-- Add CSV logging of current_temp and sensor_temp at each tick.
-- Implement similar drift and noise for humidity.
-- Add functionality to adjust ambient conditions dynamically.
-- Fix the real-time loop to allow for graceful exit (e.g., via keyboard interrupt).
-- Fix current_temp and current_humidity to update correctly in the loop with the
- drift and noise functions. 
- ( I think just need to change variable from current_temp to sensor_temp and 
- current_humidity to sensor_humidity in the loop. )
-==============================================================================
-
-"""
