@@ -4,6 +4,7 @@ __pycache__/
 *.db
 .venv/
 Test_zone.py
+Test_zone2.py
 Digital_Environment001.py
 Digital_Environment002.py
 Digital_Environment002 copy.py

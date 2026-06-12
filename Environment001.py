@@ -53,18 +53,6 @@ output_file = "chamber_log_environment.csv"
 
 """ run_in_real_time = True """
 
-
-# ============================================================================================================================================
-# Choose TRUE to calculate for a set number of ticks,
-# or FALSE to run in real time with a specified interval.
-# ============================================================================================================================================
-
-run_in_real_time = bool(input("Run in real time? (True/False): "))
-if run_in_real_time == False:
-    total_ticks = int(input("Enter the number of ticks: "))
-else:
-    time_ = float(input("Enter interval to run (in seconds): "))
-
 # ============================================================================================================================================
 # Main drift function to simulate the environment's natural tendency
 # to return to ambient conditions.
@@ -93,19 +81,40 @@ def add_sensor_noise(value, noise_level):
 ''' sensor_humidity = add_sensor_noise(current_humidity, humidity_noise) '''
 
 # ============================================================================================================================================
+# Clamp function to ensure sensor readings stay within realistic bounds (e.g., 0-100% for humidity).
+# ============================================================================================================================================
+
+
+def clamp(value, min_value, max_value):
+    if value < min_value:
+        return min_value
+    elif value > max_value:
+        return max_value
+    else:
+        return value
+
+# ============================================================================================================================================
+# Choose TRUE to calculate for a set number of ticks,
+# or FALSE to run in real time with a specified interval.
+#
 # OUTPUT for New value after drift and noise, either in real time,
 # or for a set number of ticks.
 # ============================================================================================================================================
 
 
-if run_in_real_time == True:
+run_in_real_time = (input("Run in real time? (True/False): ")).lower()
+if run_in_real_time == "true":
+    time_ = float(input("Enter interval to run (in seconds): "))
     while True:
         current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
         sensor_temp = add_sensor_noise(current_temp, temp_noise)
-        print(f"New value after drift and noise: {sensor_temp:.2f}")
+        temp_clamped = clamp(sensor_temp, 0, 100)
+        print(f"New value after drift and noise: {temp_clamped:.2f}")
         time.sleep(time_)
-else:
+elif run_in_real_time == "false":
+    total_ticks = int(input("Enter the number of ticks: "))
     for tick in range(total_ticks):
         current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
         sensor_temp = add_sensor_noise(current_temp, temp_noise)
-        print(f"New value after drift and noise: {sensor_temp:.2f}")
+        temp_clamped = clamp(sensor_temp, 0, 100)
+        print(f"New value after drift and noise: {temp_clamped:.2f}")
