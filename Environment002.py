@@ -149,7 +149,8 @@ def clamp(value, min_value, max_value):
 def co2_emission_rate(value):
     '''
 
-    This function dynamically calculates the chamber's CO2 emission rate, driven by the number of mushroom bags currently inside
+    This function dynamically calculates the chamber's CO2 emission rate, 
+    driven by the number of mushroom bags currently inside
 
     Math formula used here (currently):
             emission = mushroom * 100
@@ -163,7 +164,7 @@ def co2_emission_rate(value):
             new_value = 460 + 300 = 760
 
     '''
-    # If there is atleast 1 mushroom
+    # If there is at least 1 mushroom
     if value > 0:
         # Calculate the new value for the co2
         emission = value * 100
@@ -174,6 +175,37 @@ def co2_emission_rate(value):
         new_value = starting_co2
     # Return new_value
     return new_value
+
+# ============================================================================================================================================
+# OUTPUT FUNCTION
+# ============================================================================================================================================
+
+
+def output(current_temp, current_humidity):
+    '''
+
+    Calculates the new physical state of the chamber and generates the 
+    corresponding sensor readings.
+
+    Execution Pipeline:
+    1. Drift ("current"): Calculates the true physical values drifting toward ambient baseline.
+    2. Noise ("sensor"): Simulates hardware inaccuracy by adding Gaussian noise to the true values.
+    3. Clamp ("clamped"): Restricts the final noisy readings to valid physical boundaries (min/max).
+
+    '''
+    # Current temperature and humidity after drift function using the following variables
+    current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
+    current_humidity = drift(
+        current_humidity, ambient_humidity, moisture_decay_rate
+    )
+    # Current temperature and humidity value after adding sensor noise
+    sensor_temp = add_sensor_noise(current_temp, temp_noise)
+    sensor_humidity = add_sensor_noise(current_humidity, humidity_noise)
+    # Check if the value is within set threshold for temperature and humidity
+    temp_clamped = clamp(sensor_temp, 0, 100)
+    humidity_clamped = clamp(sensor_humidity, 0, 100)
+    # Return the current_temp, current_humidity, temp_clamped, humidity_clamped
+    return current_temp, current_humidity, temp_clamped, humidity_clamped
 
 # ============================================================================================================================================
 # Choose TRUE to calculate for a set number of ticks,
@@ -197,17 +229,9 @@ if run_in_real_time == "true":
     time_ = float(input("Enter interval to run (in seconds): "))
     # Loop for real time to continuously run
     while True:
-        # Current temperature and humidity after drift function using the following variables
-        current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
-        current_humidity = drift(
-            current_humidity, ambient_humidity, moisture_decay_rate
-        )
-        # Current temperature and humidity value after adding sensor noise
-        sensor_temp = add_sensor_noise(current_temp, temp_noise)
-        sensor_humidity = add_sensor_noise(current_humidity, humidity_noise)
-        # Check if the value is within set threshold for temperature and humidity
-        temp_clamped = clamp(sensor_temp, 0, 100)
-        humidity_clamped = clamp(sensor_humidity, 0, 100)
+        # Output function execution
+        current_temp, current_humidity, temp_clamped, humidity_clamped = output(
+            current_temp, current_humidity)
         # Print the the final value for the 3 parameters
         print(
             f"New value after drift and noise: {temp_clamped:.2f}C -- {humidity_clamped:.2f}% CO2: {current_co2:.2f}"
@@ -220,18 +244,9 @@ elif run_in_real_time == "false":
     total_ticks = int(input("Enter the number of ticks: "))
     # Advance the simulation tick-by-tick, processing environmental drift and sensor noise.
     for tick in range(total_ticks):
-        # Current temperature and humidity after drift function using the following variables
-        current_temp = drift(current_temp, ambient_temp, thermal_decay_rate)
-        current_humidity = drift(
-            current_humidity, ambient_humidity, moisture_decay_rate
-        )
-        # Current temperature and humidity value after adding sensor noise
-        sensor_temp = add_sensor_noise(current_temp, temp_noise)
-        sensor_humidity = add_sensor_noise(current_humidity, humidity_noise)
-        # Check if the value is within set threshold for temperature and humidity
-        temp_clamped = clamp(sensor_temp, 0, 100)
-        humidity_clamped = clamp(sensor_humidity, 0, 100)
-        # Print the the final value for the 3 parameters
+        # Output function execution
+        current_temp, current_humidity, temp_clamped, humidity_clamped = output(
+            current_temp, current_humidity)
         print(
             f"New value after drift and noise: {temp_clamped:.2f}C -- {humidity_clamped:.2f}% CO2: {current_co2:.2f}"
         )
